@@ -7,21 +7,33 @@ using UnityEngine.UI;
 using Newtonsoft.Json.Linq;
 using System.Collections;
 using UnityEngine.Networking;
+using System.Text;
+using Unity.VisualScripting.Antlr3.Runtime;
+using Fusion;
 
 public class Authentication : MonoBehaviour
 {
     //public Button apiButton;
     public SocketIOUnity socket;
-public string serverUrlLink = "http://localhost:3000";
+    public string serverUrlLink;
+    public GameObject Windows, android;
     void Start()
     {
-       Debug.Log(Application.platform);
-       Debug.Log(Application.absoluteURL);
+       //Debug.Log(Application.platform);
+       // if(Application.platform == RuntimePlatform.WindowsEditor)
+       // {
+       //     Windows.SetActive(true);
+       // }
+       // else
+       // {
+       //     android.SetActive(true);
+       // }
+       //Debug.Log(Application.absoluteURL);
     }
-    //void OnDestroy()
-    //{
-    //    socket.Dispose();
-    //}
+    void OnDestroy()
+    {
+        socket.Dispose();
+    }
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.Space))
@@ -45,12 +57,12 @@ public string serverUrlLink = "http://localhost:3000";
                 Debug.Log(webRequest.downloadHandler.text);
                 string clientID = "e3e26337-c4c5-4137-8aa8-9671eec42fb6";
                 string roomID = webRequest.downloadHandler.text;
-                string state = clientID+";"+roomID;
-
-
-                Application.OpenURL("https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id="+clientID+"&response_type=code&redirect_uri=http://localhost:3000/getcode&response_mode=query&scope=.default&state="+ state);
+                var formLink = "https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=" + clientID + "&response_type=code&redirect_uri=" + serverUrlLink + "/getcode&response_mode=query&scope=.default&state=" + roomID;
+                Application.OpenURL(formLink);
+                Debug.Log("connected to this link : " + formLink);
                 var uri = new Uri(serverUrlLink);
                 socket = new SocketIOUnity(uri);
+                Debug.Log("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
 
                 //here
                 socket.OnConnected += (sender, e) =>
@@ -63,10 +75,37 @@ public string serverUrlLink = "http://localhost:3000";
                 //socket.Emit("hello","world");
                 socket.On(webRequest.downloadHandler.text, (response) =>
                 {
+
+                    //Debug.Log(getToken(response.ToString()));
+                    string data = getToken(response.ToString());
+                    string accessToken = data.Split(";")[0];
+                    string refreshToken = data.Split(';')[1];
+                    //Debug.Log(data);
                     
-                    Debug.Log(getToken(response.ToString()));
+
+                    var parts = accessToken.Split('.');
+                    if (parts.Length > 2)
+                    {
+                        var decode = parts[1];
+                        var padLength = 4 - decode.Length % 4;
+                        if (padLength < 4)
+                        {
+                            decode += new string('=', padLength);
+                        }
+                        var bytes = System.Convert.FromBase64String(decode);
+                        var userInfo = System.Text.ASCIIEncoding.ASCII.GetString(bytes);
+                        Debug.Log(userInfo);
+                        JObject jsonUser = JObject.Parse(userInfo);
+                        PlayerPrefs.SetString("email", jsonUser["upn"].ToString());
+                        PlayerPrefs.SetString("name", jsonUser["given_name"].ToString());
+                        PlayerPrefs.SetString("surname", jsonUser["family_name"].ToString());
+                        PlayerPrefs.SetString("access_token", accessToken);
+                        
+                        
+                    }
+                    ;
                     //here
-                   
+
 
                     socket.Disconnect();
                 });
@@ -84,6 +123,6 @@ public string serverUrlLink = "http://localhost:3000";
     public void getRequest() {
 
        //StartCoroutine( GetRequest("https://www.boredapi.com/api/activity"));
-       StartCoroutine( GetRequest("http://localhost:3000/requestid"));
+       StartCoroutine( GetRequest(serverUrlLink+"/requestid"));
     }
 }
