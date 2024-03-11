@@ -7,7 +7,7 @@ EditorBuildSettings:
   m_Scenes:
   - enabled: 1
     path: Assets/Scenes/good scenes/Final Authentication.unity
-    guid: c8301cd79be9db2428c79b87ce84fa74
+    guid: d8b48bcb745babe46adc799e6de58971
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: a342148bced924c4c9f6e6ff5d6d8823,
       type: 2}
