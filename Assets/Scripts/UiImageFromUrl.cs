@@ -13,7 +13,6 @@ public class UiImageFromUrl : MonoBehaviour
     void Start()
     {
         StartCoroutine(GetImage(imageUrl));
-        Debug.Log("done");
     }
 
     // Update is called once per frame
