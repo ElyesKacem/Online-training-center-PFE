@@ -4,23 +4,22 @@ using UnityEngine;
 
 public class Testing : MonoBehaviour
 {
-    Quaternion defaultRotation;
-
-    // Start is called before the first frame update
-    void Awake()
+    private Vector3 f;
+    public LeanTweenType type;
+    private void Start()
     {
-        defaultRotation = transform.rotation;
+
+        f = transform.position;
     }
-
-    void LateUpdate()
+    public void test()
     {
-        // Get the current rotation
-        Quaternion currentRotation = transform.rotation;
+        transform.position = f;
+        LeanTween.moveX(this.gameObject, 5, 2).setEase(LeanTweenType.easeInOutExpo);
+    }
+    private void Update()
+    {
+        //LeanTween.moveX(this.gameObject, x, 2);
+        //x++;
 
-        // Create a new rotation where only the Z axis is locked (frozen)
-        Quaternion newRotation = Quaternion.Euler(currentRotation.eulerAngles.x, currentRotation.eulerAngles.y, defaultRotation.eulerAngles.z);
-
-        // Apply the new rotation
-        transform.rotation = newRotation;
     }
 }

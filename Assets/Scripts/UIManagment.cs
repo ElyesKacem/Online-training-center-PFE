@@ -1,4 +1,5 @@
 using Newtonsoft.Json.Linq;
+using Oculus.Interaction;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,39 +10,51 @@ using UnityEngine.UI;
 
 public class UIManagment : MonoBehaviour
 {
-    public GameObject BigCanvas;
-    public float mouvementSpeed = 20f;
+    public GameObject currentTab;
     public GameObject parentListOfCourses;
     public GameObject cardPrefab;
-    private GameObject spawn;
+    public GameObject railway;
+    public float animationDuration;
+    //public LeanTweenType type;
     // Start is called before the first frame update
     void Start()
     {
-        spawn = GameObject.Find("Menu Desktop");
+        //Debug.Log(currentTab.transform.localPosition.);
         StartCoroutine(GetRequest("https://elearning.avaxia-dev.avaxia-group.com/api/courses?search=&take=11&page=1"));
 
     }
 
+    public void switchingTab(GameObject newTab)
+    {
+        
+        if(newTab != currentTab && !LeanTween.isTweening())
+        {
+            newTab.SetActive(true);
+            float difference =  newTab.transform.localPosition.x- currentTab.transform.localPosition.x;
+            LeanTween.moveX(railway, railway.transform.position.x - difference/100, animationDuration).setEase(LeanTweenType.easeOutQuint).setOnComplete(() =>
+            {
+                Debug.Log("Animation completed!");
+                currentTab.SetActive(false);
+                currentTab =newTab;                
+                
+            });
+            
+
+        }
+    }
     // Update is called once per frame
     
-    public void closeToPlayer()
-    {
-        BigCanvas.transform.Translate(-Vector3.forward *mouvementSpeed/100);
-    }
+    //public void closeToPlayer()
+    //{
+    //    BigCanvas.transform.Translate(-Vector3.forward *mouvementSpeed/100);
+    //}
 
-    public void farFromPlayer()
-    {
-        BigCanvas.transform.Translate(Vector3.forward  * mouvementSpeed / 100);
-    }
+    //public void farFromPlayer()
+    //{
+    //    BigCanvas.transform.Translate(Vector3.forward  * mouvementSpeed / 100);
+    //}
 
-    public void rotateRight()
-    {
-        BigCanvas.transform.RotateAround(spawn.transform.position,Vector3.up,mouvementSpeed/5);
-    } 
-    public void rotateLeft()
-    {
-        BigCanvas.transform.RotateAround(spawn.transform.position,Vector3.down,mouvementSpeed/5);
-    }
+
 
     public void setCourse(GameObject o,string title, string image)
     {
